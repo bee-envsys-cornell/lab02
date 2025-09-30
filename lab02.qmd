@@ -154,6 +154,7 @@ Plot histograms of samples from these distributions and conduct a Monte Carlo ex
 * How did you decide on your sample size? 
 * Why do you think the estimates differed or did not differ (you can also plot the depth-damage function to compare with the samples)? 
 * How might you decide (based on getting additional information, if needed) which distribution is "better"?
+* Try redoing the analysis for one of the distributions with a different seed. How much of a difference does that make?
 
 ::: {.cell .markdown}
 
