@@ -1,5 +1,5 @@
 ---
-title: "BEE 4750 Lab 2: Uncertainty and Monte Carlo"
+title: "BEE 4750 Lab 2: Monte Carlo"
 date: last-modified
 format:
     html:        
@@ -19,7 +19,7 @@ execute:
     echo: true
 engine: julia
 julia:
-    exeflags: ["+1.10.4"]
+    exeflags: ["+1.11.5"]
 format-links: [pdf, ipynb]
 ---
 
@@ -34,7 +34,7 @@ format-links: [pdf, ipynb]
 ::: {.callout-important icon=false}
 ### Due Date
 
-Wednesday, 9/25/24, 9:00pm
+Thursday, 10/02/25, 9:00pm
 :::
 
 ::: {.content-visible when-format="html"}
@@ -73,9 +73,7 @@ using Plots # plotting
 
 ## Overview
 
-In this lab, we will use Monte Carlo analysis to analyze a version of the culmination of every episode of the long-running game show [The Price Is Right](https://en.wikipedia.org/wiki/The_Price_Is_Right): the [Showcase](https://en.wikipedia.org/wiki/The_Price_Is_Right#Showcase). 
-
-Monte Carlo methods involve the simulation of random numbers from probability distributions. In an environmental context, we often propagate these random numbers through some more complicated model and then compute a resulting statistic which is relevant for assessing performance or risk, such as an average outcome or a particular quantile.
+In this lab, we will conduct a Monte Carlo experiment and explore how sensitive Monte Carlo estimates are to the underlying probability distribution(s).
 
 You should always start any computing with random numbers by setting a "seed," which controls the sequence of numbers which are generated (since these are not *really* random, just "pseudorandom"). In Julia, we do this with the `Random.seed!()` function.
 
@@ -138,33 +136,24 @@ xlabel!("Dice Value")
     penalty will be deducted if this is not done.
 
 
-## Exercise (3 Points)
+## Problem
 
-The Showcase is the final round of every episode of The Price is Right, matching the two big winners from the episode. Each contestant is shown a "showcase" of prizes, which are usually some combination of a trip, a motor vehicle, some furniture, and maybe some other stuff. They then each have to make a bid on the retail price of the showcase. The rules are:
+A common engineering problem is to quantify flood risk, which is typically computed by propagating a flood hazard distribution through a *depth-damage function* relating flood depths to economic damages. A reasonable depth-damage function for a house without a basement is a bounded logistic function,
+$$d(h) = \mathbb{1}_{h > 0} \frac{L}{1 + \exp(-k (h - h_0))},$$
 
-* an overbid is an automatic loss;
-* the contest who gets closest to the retail price wins their showcase;
-* if a contestant gets within \$250 of the retail price and is closer than their opponent, they win both showcases.
+where $d$ is the damage as a percent of total structure value, $h$ is the water depth (relative to the house's ground floor elevation) in m, $\mathbb{1}_{x > 0}$ is the indicator function, $L$ is the maximum loss in USD, $k$ is the slope of the depth-damage relationship, and $h_0$ is the inflection point. We'll assume $L=\$200,000$, $k=0.8$, and $h_0=3$.
 
+For this problem, suppose that we have two different probability distributions characterizing annual maxima flood depths:
 
-Your goal is to find a wager which maximizes your expected winnings, which we may as well call utility, based on your assessment of the probability of your showcase retail price. Make the following assumptions about your expected winnings if you don't overbid:
+1. $h \sim LogNormal(1.2, 0.3)$;
+2. $h \sim GeneralizedExtremeValue(3, 0.9, -0.15)$.
 
-* If you win both showcases, the value is the double of the single showcase value. 
-* If you did not win both showcases but bid under the showcase value, the probability of being outbid increases linearly as the distance between your bid and the value increases (in other words, if you bid the exact value, you win with probability 1, and if you bid \$0, you win with probability 0).
+Plot histograms of samples from these distributions and conduct a Monte Carlo experiment for annual maximum flood damages using each. Answer the following questions:
 
-We'll assume that the distribution of all showcases offered by the show is given as truncated normal distribution, which means a normal distribution which has an upper and/or lower bound. `Distributions.jl` makes it easy to specify truncations on any distribution, not just normal distributions. For example, we'll use the distribution shown in @fig-values for the showcase values (you can just directly use the `showcase_dist` distribution in your lab code).
-
-```{julia}
-#| label: fig-values
-#| fig-cap: Distribution of Showcase values for this lab, given as a truncated normal distribution.
-
-showcase_dist = truncated(Normal(31000, 4500), lower=5000, upper=42000)
-showcase_samples = rand(showcase_dist, 10_000)
-histogram(showcase_samples)
-```
-
-Find your expected winnings if you bid $35,000. Plot the outcomes of your Monte Carlo experiment (iterations vs. running estimate). How did you decide how many samples to use?
-
+* What are the Monte Carlo estimates of the expected value and the 99% quantile for the annual maximum damage the structure would suffer for each of these flood hazard distributions? 
+* How did you decide on your sample size? 
+* Why do you think the estimates differed or did not differ (you can also plot the depth-damage function to compare with the samples)? 
+* How might you decide (based on getting additional information, if needed) which distribution is "better"?
 
 ::: {.cell .markdown}
 
